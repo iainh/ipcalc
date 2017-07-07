@@ -1,0 +1,8 @@
+[package]
+name = "ipcalc"
+version = "0.1.0"
+authors = ["Iain H. <iain@spiralpoint.org>"]
+
+[dependencies]
+clap = "2.25"
+colored = "1.5"
