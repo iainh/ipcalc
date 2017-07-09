@@ -6,3 +6,4 @@ authors = ["Iain H. <iain@spiralpoint.org>"]
 [dependencies]
 clap = "2.25"
 colored = "1.5"
+regex = "0.2"

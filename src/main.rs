@@ -1,10 +1,14 @@
 #[macro_use]
 extern crate clap;
 extern crate colored;
+extern crate regex;
 
+use std::cmp;
 use colored::*;
 use clap::{App, Arg, ArgMatches};
 use std::net::Ipv4Addr;
+use regex::Regex;
+use std::process;
 
 fn to_int(addr: Ipv4Addr) -> u32 {
     let ip = addr.octets();
@@ -32,6 +36,18 @@ fn invert(ip: Ipv4Addr) -> Ipv4Addr {
 fn cidr(ip: Ipv4Addr) -> usize {
     let binary = format!("{:b}", to_int(ip)).to_string();
     binary.matches("1").count()
+}
+
+fn netmask_from_cidr(cidr: &str) -> Ipv4Addr {
+    let mut mask: [u8; 4] = [0, 0, 0, 0];
+    let mut c = cidr.parse::<u32>().unwrap();
+
+    for i in 0..4 {
+        let n = cmp::min(c, 8);
+        mask[i] = (256 - 2u32.pow(8 - n)) as u8;
+        c = c - n;
+    }
+    return Ipv4Addr::new(mask[0], mask[1], mask[2], mask[3]);
 }
 
 fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
@@ -67,7 +83,24 @@ fn parse_args() -> ArgMatches<'static> {
 fn main() {
     let args = parse_args();
 
-    let address: Ipv4Addr = match args.value_of("ADDRESS").unwrap_or("192.168.1.0").parse() {
+    let mut netmask_str = args.value_of("NETMASK").unwrap_or("255.255.255.0");
+    let mut address_str = args.value_of("ADDRESS").unwrap_or("192.168.1.0");
+
+    let address_alone = Regex::new(r"^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$").unwrap();
+    let address_cidr = Regex::new(r"^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}/\d{1,2}$").unwrap();
+
+    if address_alone.is_match(address_str) {
+        // Expected format
+    } else if address_cidr.is_match(address_str) {
+        let d: Vec<_> = address_str.split("/").collect();
+        address_str = d[0];
+        netmask_str = d[1];
+    } else {
+        eprintln!("{}","Unable to determine address/netmask format from input".red());
+        process::exit(1);
+    }
+
+    let address = match address_str.parse() {
         Ok(ip) => ip,
         Err(_) => {
             println!("{}", "Invalid IP address".red());
@@ -75,13 +108,18 @@ fn main() {
         }
     };
 
-    let netmask: Ipv4Addr = match args.value_of("NETMASK").unwrap_or("255.255.255.0").parse() {
-        Ok(ip) => ip,
-        Err(_) => {
-            println!("{}", "Invalid netmask address".red());
-            Ipv4Addr::new(255, 255, 255, 0)
-        }
-    };
+    let netmask: Ipv4Addr =
+        if netmask_str.len() <= 2 {
+            netmask_from_cidr(netmask_str)
+        } else {
+            match netmask_str.parse() {
+                Ok(ip) => ip,
+                Err(_) => {
+                    println!("{}", "Invalid netmask address".red());
+                    Ipv4Addr::new(255, 255, 255, 0)
+                }
+            }
+        };
 
     print_output(address, netmask);
 }
