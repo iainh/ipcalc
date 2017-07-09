@@ -58,7 +58,9 @@ fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
     let host_max = to_ip(to_int(broadcast) - 1);
 
     println!("Address:   {ip}", ip = address.to_string().blue());
-    println!("Netmask:   {ip} = {cidr}", ip = netmask.to_string().blue(), cidr = cidr.to_string().blue());
+    println!("Netmask:   {ip} = {cidr}",
+             ip = netmask.to_string().blue(),
+             cidr = cidr.to_string().blue());
     println!("Wildcard:  {ip}", ip = invert(netmask).to_string().blue());
     println!("Network:   {ip}", ip = network.to_string().blue());
 
@@ -70,9 +72,7 @@ fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
 }
 
 fn parse_args() -> ArgMatches<'static> {
-    App::new("yes")
-        .version(crate_version!())
-        .author(crate_authors!())
+    app_from_crate!()
         .arg(Arg::with_name("ADDRESS")
             .index(1))
         .arg(Arg::with_name("NETMASK")
