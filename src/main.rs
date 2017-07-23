@@ -123,3 +123,65 @@ fn main() {
 
     print_output(address, netmask);
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn to_int_test() {
+        let mut addr: Ipv4Addr = Ipv4Addr::from(0);
+        assert_eq!(to_int(addr), 0);
+
+        addr = Ipv4Addr::from([255, 255, 255, 255]);
+        assert_eq!(to_int(addr), 4294967295);
+    }
+
+    #[test]
+    fn to_ip_test() {
+        let mut number = 0;
+        assert_eq!(to_ip(number), Ipv4Addr::from([0, 0, 0, 0]));
+
+        number = 4294967295;
+        assert_eq!(to_ip(number), Ipv4Addr::from([255, 255, 255, 255]));
+    }
+
+    #[test]
+    fn network_address_test() {
+        let expected = Ipv4Addr::from([192, 168, 1, 0]);
+
+        let address = Ipv4Addr::from([192, 168, 1, 100]);
+        let netmask = Ipv4Addr::from([255, 255, 255, 0]);
+
+        assert_eq!(expected, network_address(address, netmask));
+    }
+
+    #[test]
+    fn broadcast_test() {
+        let expected = Ipv4Addr::from([192, 168, 1, 255]);
+
+        let address = Ipv4Addr::from([192, 168, 1, 100]);
+        let netmask = Ipv4Addr::from([255, 255, 255, 0]);
+
+        let broadcast = broadcast_address(address, netmask);
+
+        assert_eq!(expected, broadcast);
+    }
+
+    #[test]
+    fn cidr_test() {
+        assert_eq!(32, cidr(Ipv4Addr::from([255, 255, 255, 255])));
+        assert_eq!(31, cidr(Ipv4Addr::from([255, 255, 255, 254])));
+        assert_eq!(30, cidr(Ipv4Addr::from([255, 255, 255, 252])));
+        assert_eq!(29, cidr(Ipv4Addr::from([255, 255, 255, 248])));
+        assert_eq!(0, cidr(Ipv4Addr::from([0, 0, 0, 0])));
+    }
+
+    #[test]
+    fn netmask_from_cidr_test() {
+        assert_eq!(Ipv4Addr::from([255, 255, 255, 255]), netmask_from_cidr(format!("{}", 32).as_ref()));
+        assert_eq!(Ipv4Addr::from([255, 255, 255, 254]), netmask_from_cidr(format!("{}", 31).as_ref()));
+        assert_eq!(Ipv4Addr::from([255, 255, 255, 252]), netmask_from_cidr(format!("{}", 30).as_ref()));
+        assert_eq!(Ipv4Addr::from([0, 0, 0, 0]), netmask_from_cidr(format!("{}", 0).as_ref()));
+    }
+}
