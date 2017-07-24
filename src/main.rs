@@ -5,7 +5,7 @@ extern crate regex;
 
 use std::cmp;
 use colored::*;
-use clap::{App, Arg, ArgMatches};
+use clap::{Arg, ArgMatches};
 use std::net::Ipv4Addr;
 use regex::Regex;
 use std::process;
@@ -68,7 +68,10 @@ fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
 
     println!("HostMax:   {ip}", ip = host_max.to_string().blue());
     println!("Broadcast: {ip}", ip = broadcast.to_string().blue());
-    println!("Hosts:     {}", format!("{}", (to_int(broadcast) - to_int(host_min))).blue());
+
+    if cidr < 32 {
+        println!("Hosts:     {}", format!("{}", (to_int(broadcast) - to_int(host_min))).blue());
+    }
 }
 
 fn parse_args() -> ArgMatches<'static> {
@@ -78,6 +81,10 @@ fn parse_args() -> ArgMatches<'static> {
         .arg(Arg::with_name("NETMASK")
             .index(2))
         .get_matches()
+}
+
+fn display_error(msg: &str) {
+    println!("{}", msg.red());
 }
 
 fn main() {
@@ -96,30 +103,23 @@ fn main() {
         address_str = d[0];
         netmask_str = d[1];
     } else {
-        eprintln!("{}","Unable to determine address/netmask format from input".red());
+        display_error("Unable to determine address/netmask format from input");
         process::exit(1);
     }
 
-    let address = match address_str.parse() {
-        Ok(ip) => ip,
-        Err(_) => {
-            println!("{}", "Invalid IP address".red());
-            Ipv4Addr::new(192, 168, 0, 1)
-        }
-    };
+    let address = address_str.parse().unwrap_or({
+        display_error("Invalid IP address");
+        Ipv4Addr::new(192, 168, 0, 1)
+    });
 
-    let netmask: Ipv4Addr =
-        if netmask_str.len() <= 2 {
-            netmask_from_cidr(netmask_str)
-        } else {
-            match netmask_str.parse() {
-                Ok(ip) => ip,
-                Err(_) => {
-                    println!("{}", "Invalid netmask address".red());
-                    Ipv4Addr::new(255, 255, 255, 0)
-                }
-            }
-        };
+    let netmask = if netmask_str.len() <= 2 {
+        netmask_from_cidr(netmask_str)
+    } else {
+        netmask_str.parse().unwrap_or({
+            display_error("Invalid netmask address");
+            Ipv4Addr::new(255, 255, 255, 0)
+        })
+    };
 
     print_output(address, netmask);
 }
