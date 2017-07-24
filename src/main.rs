@@ -62,12 +62,14 @@ fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
              ip = netmask.to_string().blue(),
              cidr = cidr.to_string().blue());
     println!("Wildcard:  {ip}", ip = invert(netmask).to_string().blue());
-    println!("Network:   {ip}", ip = network.to_string().blue());
+    println!("----");
+    println!("Network:   {ip}/{cidr}", ip = network.to_string().blue(),
+             cidr = cidr.to_string().blue());
+    println!("Broadcast: {ip}", ip = broadcast.to_string().blue());
 
     println!("HostMin:   {ip}", ip = host_min.to_string().blue());
 
     println!("HostMax:   {ip}", ip = host_max.to_string().blue());
-    println!("Broadcast: {ip}", ip = broadcast.to_string().blue());
 
     if cidr < 32 {
         println!("Hosts:     {}", format!("{}", (to_int(broadcast) - to_int(host_min))).blue());
@@ -107,16 +109,14 @@ fn main() {
         process::exit(1);
     }
 
-    let address = address_str.parse().unwrap_or({
-        display_error("Invalid IP address");
+    let address = address_str.parse::<Ipv4Addr>().unwrap_or({
         Ipv4Addr::new(192, 168, 0, 1)
     });
 
     let netmask = if netmask_str.len() <= 2 {
         netmask_from_cidr(netmask_str)
     } else {
-        netmask_str.parse().unwrap_or({
-            display_error("Invalid netmask address");
+        netmask_str.parse::<Ipv4Addr>().unwrap_or({
             Ipv4Addr::new(255, 255, 255, 0)
         })
     };
