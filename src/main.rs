@@ -58,13 +58,18 @@ fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
     let host_max = to_ip(to_int(broadcast) - 1);
 
     println!("Address:   {ip}", ip = address.to_string().blue());
-    println!("Netmask:   {ip} = {cidr}",
-             ip = netmask.to_string().blue(),
-             cidr = cidr.to_string().blue());
+    println!(
+        "Netmask:   {ip} = {cidr}",
+        ip = netmask.to_string().blue(),
+        cidr = cidr.to_string().blue()
+    );
     println!("Wildcard:  {ip}", ip = invert(netmask).to_string().blue());
     println!("----");
-    println!("Network:   {ip}/{cidr}", ip = network.to_string().blue(),
-             cidr = cidr.to_string().blue());
+    println!(
+        "Network:   {ip}/{cidr}",
+        ip = network.to_string().blue(),
+        cidr = cidr.to_string().blue()
+    );
     println!("Broadcast: {ip}", ip = broadcast.to_string().blue());
 
     println!("HostMin:   {ip}", ip = host_min.to_string().blue());
@@ -72,16 +77,17 @@ fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
     println!("HostMax:   {ip}", ip = host_max.to_string().blue());
 
     if cidr < 32 {
-        println!("Hosts:     {}", format!("{}", (to_int(broadcast) - to_int(host_min))).blue());
+        println!(
+            "Hosts:     {}",
+            format!("{}", (to_int(broadcast) - to_int(host_min))).blue()
+        );
     }
 }
 
 fn parse_args() -> ArgMatches<'static> {
     app_from_crate!()
-        .arg(Arg::with_name("ADDRESS")
-            .index(1))
-        .arg(Arg::with_name("NETMASK")
-            .index(2))
+        .arg(Arg::with_name("ADDRESS").index(1))
+        .arg(Arg::with_name("NETMASK").index(2))
         .get_matches()
 }
 
@@ -179,9 +185,21 @@ mod test {
 
     #[test]
     fn netmask_from_cidr_test() {
-        assert_eq!(Ipv4Addr::from([255, 255, 255, 255]), netmask_from_cidr(format!("{}", 32).as_ref()));
-        assert_eq!(Ipv4Addr::from([255, 255, 255, 254]), netmask_from_cidr(format!("{}", 31).as_ref()));
-        assert_eq!(Ipv4Addr::from([255, 255, 255, 252]), netmask_from_cidr(format!("{}", 30).as_ref()));
-        assert_eq!(Ipv4Addr::from([0, 0, 0, 0]), netmask_from_cidr(format!("{}", 0).as_ref()));
+        assert_eq!(
+            Ipv4Addr::from([255, 255, 255, 255]),
+            netmask_from_cidr(format!("{}", 32).as_ref())
+        );
+        assert_eq!(
+            Ipv4Addr::from([255, 255, 255, 254]),
+            netmask_from_cidr(format!("{}", 31).as_ref())
+        );
+        assert_eq!(
+            Ipv4Addr::from([255, 255, 255, 252]),
+            netmask_from_cidr(format!("{}", 30).as_ref())
+        );
+        assert_eq!(
+            Ipv4Addr::from([0, 0, 0, 0]),
+            netmask_from_cidr(format!("{}", 0).as_ref())
+        );
     }
 }
