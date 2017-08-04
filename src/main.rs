@@ -23,9 +23,9 @@ fn network_address(address: Ipv4Addr, netmask: Ipv4Addr) -> Ipv4Addr {
     to_ip(to_int(address) & to_int(netmask))
 }
 
-fn broadcast_address(network_address: Ipv4Addr, netmask: Ipv4Addr) -> Ipv4Addr {
+fn broadcast_address(host: Ipv4Addr, netmask: Ipv4Addr) -> Ipv4Addr {
     let inverted = invert(netmask);
-    to_ip(to_int(network_address) | to_int(inverted))
+    to_ip(to_int(host) | to_int(inverted))
 }
 
 fn invert(ip: Ipv4Addr) -> Ipv4Addr {
@@ -52,7 +52,7 @@ fn netmask_from_cidr(cidr: &str) -> Ipv4Addr {
 
 fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
     let network = network_address(address, netmask);
-    let broadcast = broadcast_address(network, netmask);
+    let broadcast = broadcast_address(address, netmask);
     let cidr = cidr(netmask);
     let host_min = to_ip(to_int(network) + 1);
     let host_max = to_ip(to_int(broadcast) - 1);
