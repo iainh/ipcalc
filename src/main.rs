@@ -38,10 +38,10 @@ fn cidr(ip: Ipv4Addr) -> usize {
     binary.matches("1").count()
 }
 
-fn netmask_from_cidr(cidr: &str) -> Ipv4Addr {
-    let mut mask: [u8; 4] = [0, 0, 0, 0];
-    let mut c = cidr.parse::<u32>().unwrap();
+fn netmask_from_cidr(cidr: u32) -> Ipv4Addr {
+    let mut c = cidr;
 
+    let mut mask: [u8; 4] = [0, 0, 0, 0];
     for i in 0..4 {
         let n = cmp::min(c, 8);
         mask[i] = (256 - 2u32.pow(8 - n)) as u8;
@@ -115,16 +115,14 @@ fn main() {
         process::exit(1);
     }
 
-    let address = address_str.parse::<Ipv4Addr>().unwrap_or({
-        Ipv4Addr::new(192, 168, 0, 1)
-    });
+    let address = address_str.parse::<Ipv4Addr>().unwrap_or(
+        Ipv4Addr::new(192, 168, 0, 1));
 
     let netmask = if netmask_str.len() <= 2 {
-        netmask_from_cidr(netmask_str)
+        netmask_from_cidr(netmask_str.parse::<u32>().unwrap())
     } else {
-        netmask_str.parse::<Ipv4Addr>().unwrap_or({
-            Ipv4Addr::new(255, 255, 255, 0)
-        })
+        netmask_str.parse::<Ipv4Addr>().unwrap_or(
+            Ipv4Addr::new(255, 255, 255, 0))
     };
 
     print_output(address, netmask);
@@ -185,21 +183,9 @@ mod test {
 
     #[test]
     fn netmask_from_cidr_test() {
-        assert_eq!(
-            Ipv4Addr::from([255, 255, 255, 255]),
-            netmask_from_cidr(format!("{}", 32).as_ref())
-        );
-        assert_eq!(
-            Ipv4Addr::from([255, 255, 255, 254]),
-            netmask_from_cidr(format!("{}", 31).as_ref())
-        );
-        assert_eq!(
-            Ipv4Addr::from([255, 255, 255, 252]),
-            netmask_from_cidr(format!("{}", 30).as_ref())
-        );
-        assert_eq!(
-            Ipv4Addr::from([0, 0, 0, 0]),
-            netmask_from_cidr(format!("{}", 0).as_ref())
-        );
+        assert_eq!(Ipv4Addr::from([255, 255, 255, 255]), netmask_from_cidr(32));
+        assert_eq!(Ipv4Addr::from([255, 255, 255, 254]), netmask_from_cidr(31));
+        assert_eq!(Ipv4Addr::from([255, 255, 255, 252]), netmask_from_cidr(30));
+        assert_eq!(Ipv4Addr::from([0, 0, 0, 0]), netmask_from_cidr(0));
     }
 }
