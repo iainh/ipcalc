@@ -35,7 +35,7 @@ fn invert(ip: Ipv4Addr) -> Ipv4Addr {
 
 fn cidr(ip: Ipv4Addr) -> usize {
     let binary = format!("{:b}", to_int(ip)).to_string();
-    binary.matches("1").count()
+    binary.matches('1').count()
 }
 
 fn netmask_from_cidr(cidr: u32) -> Ipv4Addr {
@@ -45,9 +45,9 @@ fn netmask_from_cidr(cidr: u32) -> Ipv4Addr {
     for i in 0..4 {
         let n = cmp::min(c, 8);
         mask[i] = (256 - 2u32.pow(8 - n)) as u8;
-        c = c - n;
+        c -= n;
     }
-    return Ipv4Addr::new(mask[0], mask[1], mask[2], mask[3]);
+    Ipv4Addr::new(mask[0], mask[1], mask[2], mask[3])
 }
 
 fn print_output(address: Ipv4Addr, netmask: Ipv4Addr) {
@@ -107,7 +107,7 @@ fn main() {
     if address_alone.is_match(address_str) {
         // Expected format
     } else if address_cidr.is_match(address_str) {
-        let d: Vec<_> = address_str.split("/").collect();
+        let d: Vec<_> = address_str.split('/').collect();
         address_str = d[0];
         netmask_str = d[1];
     } else {
