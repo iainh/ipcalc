@@ -107,7 +107,7 @@ fn main() {
     if address_alone.is_match(address_str) {
         // Expected format
     } else if address_cidr.is_match(address_str) {
-        let d: Vec<_> = address_str.split('/').collect();
+        let d = address_str.split('/').collect::<Vec<&str>>();
         address_str = d[0];
         netmask_str = d[1];
     } else {
