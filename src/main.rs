@@ -1,6 +1,7 @@
+
+extern crate ansi_term;
 #[macro_use]
 extern crate clap;
-extern crate ansi_term;
 extern crate regex;
 
 use std::cmp;
@@ -121,19 +122,16 @@ fn main() {
         process::exit(1);
     }
 
-    let address = address_str.parse::<Ipv4Addr>().unwrap_or(
-        Ipv4Addr::new(192, 168, 0, 1),
-    );
+    let address = address_str
+        .parse::<Ipv4Addr>()
+        .unwrap_or(Ipv4Addr::new(192, 168, 0, 1));
 
     let netmask = if netmask_str.len() <= 2 {
         netmask_from_cidr(netmask_str.parse::<u32>().unwrap())
     } else {
-        netmask_str.parse::<Ipv4Addr>().unwrap_or(Ipv4Addr::new(
-            255,
-            255,
-            255,
-            0,
-        ))
+        netmask_str
+            .parse::<Ipv4Addr>()
+            .unwrap_or(Ipv4Addr::new(255, 255, 255, 0))
     };
 
     print_output(&address, &netmask);
