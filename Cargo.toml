@@ -1,9 +1,9 @@
 [package]
 name = "ipcalc"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Iain H. <iain@spiralpoint.org>"]
 
 [dependencies]
+ansi_term = "0.9"
 clap = "2.26"
-colored = "1.5"
 regex = "0.2"
